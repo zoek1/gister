@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+      <div class="navbar-co">
+	<a class="navbar-brand" href="#">
+	  <img src="{%  static "images/logo.png" %}" class="d-inline-block align-top" alt="">
+	</a>
+
+	<ul class="navbar-nav ">
+	  <li class="nav-item">
+            <a class="nav-link" href="#">All gist</a>
+	  </li>
+	</ul>
+      </div>
+      <div class="navbar-co">
+	<form class="form-inline">
+	  <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+	  <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+	</form>
+
+	<button type="button" class="btn btn-link" aria-label="Left Align">
+	  <span class="fas fa-plus" aria-hidden="true">Gist</span>
+	</button>
+	<div class="user-login">
+	 <p><img src="https://www.fcien.edu.uy/images/perfiles_egresados/avatar-hombre.png" class="rounded-circle" alt="Cinque Terre"> User</p>
+	</div>
+
+
+      </div>
+    </div>
+  </nav>
+
+  <body>
+    <div class="container form">
+      <form>
+	<div class="form-group">
+	  <input class="form-control" type="text" placeholder="Gist description">
+	</div>
+	<div class="form-group">
+	  <textarea class="form-control" id="exampleFormControlTextarea1" rows="7"></textarea>
+	</div>
+
+	<div class="form-group row">
+	  <label for="exampleFormControlSelect1" class="col-lg-2 col-sm-12 col-form-label">Syntax Highlighting</label>
+	  <div class="col-lg-3 col-sm-12">
+	    <select class="form-control" id="exampleFormControlSelect1">
+	      <option>None</option>
+	      <option>C</option>
+	      <option>CSS</option>
+	      <option>4</option>
+	      <option>5</option>
+	    </select>
+	  </div>
+	</div>
+	<div class="form-group row">
+	  <label for="exampleFormControlSelect1" class="col-lg-2 col-sm-12 col-form-label">Paste Expiration</label>
+	  <div class="col-lg-3 col-sm-12">
+	    <select class="form-control" id="exampleFormControlSelect1">
+	      <option>Never</option>
+	      <option>10 Minutes</option>
+	      <option>1 Hour</option>
+	      <option>1 Day</option>
+	      <option>1 Week</option>
+	      <option>2 Weeks</option>
+	      <option>1 Month</option>
+	      <option>6 Months</option>
+	      <option>1 Year</option>
+	    </select>
+	  </div>
+	</div>
+	<div class="form-group row">
+	  <label for="exampleFormControlSelect1" class="col-lg-2 col-sm-12 col-form-label">Paste Exposure</label>
+	  <div class="col-lg-3 col-sm-12">
+	    <select class="form-control" id="exampleFormControlSelect1">
+	      <option>Public</option>
+	      <option>Unlisted</option>
+	    </select>
+	  </div>
+	</div>
+	<div class="container-button">
+	  <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Create secret gist</button>
+	  <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Create public gist</button>
+	</div>
+
+      </form>
+    </div>
+{% endblock %}

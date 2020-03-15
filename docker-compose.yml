@@ -1,0 +1,31 @@
+---
+version: "3"
+services:
+  db:
+   image: postgres
+   env_file: build/.pg.env
+   ports:
+     - "127.0.0.1:5432:5432"
+
+
+  cache:
+   image: redis
+   ports:
+     - "127.0.0.1:6379:6379"
+
+#  web:
+#    build:
+#      context: .
+#    env_file: build/.env
+#    command: python manage.py runserver 0.0.0.0:8000
+#    volumes:
+#      - .:/code
+#      - /var/sia:/var/sia
+#    ports:
+#      - "8000:8000"
+#      - "127.0.0.1:9980:9980"
+#    links:
+#      - db
+#    depends_on:
+#      - db
+    
