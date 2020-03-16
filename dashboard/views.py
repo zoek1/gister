@@ -94,5 +94,5 @@ def create_gist(request):
 
     return Response({
         'id': gist_id,
-        'url': f'${HOST_URL}/gist/{gist_id}'
+        'url': f'{HOST_URL}/gist/{gist_id}'
     })

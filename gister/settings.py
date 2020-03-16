@@ -140,4 +140,4 @@ CELERY_BROKER_URL = 'redis://localhost'
 SIA_REMOTE = False
 SIA_API_BASEPATH = 'http://127.0.0.1:9980'
 SIA_CACHE_DIR = path.abspath('cache')
-HOST_URL = '127.0.0.0:8000'
+HOST_URL = 'http://127.0.0.1:8000'

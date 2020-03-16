@@ -9,6 +9,7 @@ class Gist(models.Model):
         ('non_listed', 'No Listed')
     )
     EXPIRATION_OPTIONS = (
+        ('NEVER', 'Never'),
         ('10_MINUTES', '10 Minutes'),
         ('1_HOUR', '1 Hour'),
         ('1_DAY', '1 Day'),
@@ -29,7 +30,7 @@ class Gist(models.Model):
     created = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now_add=True)
     user_address = models.CharField(max_length=120, blank=True, default='')
-
+    active = models.BooleanField(default=True)
 
 class File(models.Model):
     sia_path = models.CharField(max_length=120, blank=True, default='')
