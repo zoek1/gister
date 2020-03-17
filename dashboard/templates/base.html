@@ -68,7 +68,7 @@
     <script>
       $(document).ready(async () => {
         const web3 = new Web3(Web3.givenProvider || "ws://localhost:8545");
-        $('#login-status').attr('style','display:block !important');;
+        $('#login-status').attr('style','display:block !important');
         try {
 
           const address = (await window.ethereum.enable())[0];
