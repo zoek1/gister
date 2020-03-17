@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
-from django.urls import include
+from django.urls import include, path
 
 from dashboard.views import new_gist
 
@@ -23,5 +23,5 @@ urlpatterns = [
     url(r'^$', new_gist, name='new_gist'),
     url(r'^_administration/', admin.site.urls),
     url(r'^gists/', include('dashboard.urls')),
-    url(r'^api/v1/gists', include('dashboard.api_urls'))
+    path('api/v1/gists', include(('dashboard.api_urls', 'dashboard'), namespace='api-gists'))
 ]

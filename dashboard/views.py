@@ -46,8 +46,10 @@ def new_gist(request):
 # Create your views here.
 def gist_details(request, gist_id):
     gist = Gist.objects.get(uuid=gist_id)
+    files = gist.file_set.all()
     context = {
-        'gist': gist
+        'gist': gist,
+        'files': files,
     }
     return render(request, 'gist_details.html', context=context)
 

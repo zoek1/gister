@@ -80,6 +80,14 @@ class File(models.Model):
     created = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now_add=True)
 
+    def get_skynet_url(self):
+        return f'https://siasky.net/{self.skynet_url.lstrip("sia://")}'
+
+    def get_lang(self):
+        if len(self.gist.categories) > 0:
+            return self.gist.categories[0]
+
+        return 'plaintext'
 
 class Follow(models.Model):
     user_address = models.CharField(max_length=120)
