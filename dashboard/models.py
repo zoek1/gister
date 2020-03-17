@@ -31,6 +31,46 @@ class Gist(models.Model):
     updated_at = models.DateTimeField(auto_now_add=True)
     user_address = models.CharField(max_length=120, blank=True, default='')
     active = models.BooleanField(default=True)
+    skynet_manifest_url = models.CharField(max_length=120, null=True, blank=True)
+    sia_manifest_path = models.CharField(max_length=120, null=True, blank=True)
+
+
+    def get_default_dict(self):
+        response = {
+            'id': self.uuid,
+            'visibility': self.visibility,
+            'skynet_url': self.skynet_url,
+            'description': self.description,
+            'expiration': self.expiration,
+            'categories': self.categories,
+            'user_address': self.user_address,
+            'parent': self.parent,
+            'package_path': self.sia_path,
+            'active': self.active,
+            'created': self.created.isoformat(),
+            'updated_at': self.updated_at.isoformat(),
+            'manifest_url': self.skynet_manifest_url
+        }
+
+        files = []
+        ready = True
+        for file in self.file_set.all():
+            files.append({
+                'sia_path': file.sia_path,
+                'skynet_url': file.skynet_url,
+                'file_name': file.file_name,
+                'created': file.created.isoformat(),
+                'updated_at': file.updated_at.isoformat(),
+            })
+
+            if not file.skynet_url:
+                ready = False
+
+        response['ready'] = ready
+        response['files'] = files
+
+        return response
+
 
 class File(models.Model):
     sia_path = models.CharField(max_length=120, blank=True, default='')

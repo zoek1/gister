@@ -3,6 +3,7 @@ import uuid
 from os import path
 
 from django.shortcuts import render
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.renderers import JSONRenderer
@@ -11,7 +12,7 @@ from git import Repo
 
 
 from dashboard.models import Gist, File
-from gister.settings import SIA_CACHE_DIR, SIA_REMOTE, HOST_URL
+from gister.settings import SIA_CACHE_DIR, SIA_REMOTE, HOST_URL, SIA_API_BASEPATH
 from dashboard.tasks import upload_zip, upload_file
 from dashboard.utils import sia_upload_options
 
@@ -69,36 +70,51 @@ def create_gist(request):
         if gist.exists():
             parent_gist = gist.first()
 
-    metadata = {
+    base_metadata = {
         'visibility': raw_metadata.get('visibility', 'public'),
         'parent': parent_gist,
-        'sia_path': f'{gist_id}.zip',
-        'skynet_url': '',
         'description': raw_metadata.get('description', ''),
         'expiration': raw_metadata.get('expiration', 'never'),
         'categories': raw_metadata.get('categories', []),
         'user_address': raw_metadata.get('address', ''),
         'uuid': gist_id
     }
+    params = base_metadata.copy()
+    params['sia_path'] = f'{gist_id}.zip'
+    params['skynet_url'] = ''
 
-    new_gist = Gist.objects.create(**metadata)
+    new_gist = Gist.objects.create(**params)
 
+    metadata = base_metadata.copy()
+    metadata['sia_package_path'] = f'{gist_id}.zip'
+    metadata['skynet_package_url'] = ''
+    metadata['files'] = {file['name']: '' for file in files}
+    metadata['created'] = timezone.now().isoformat()
+    # Write and commit files
     [filepaths, metadata_path] = write_files(gist_id, files, metadata)
     paths = [path.join(SIA_CACHE_DIR, filepath) for filepath in filepaths]
-    repo.index.add([path.join(SIA_CACHE_DIR, metadata_path)] + paths)
+    metadata_abs_path = path.join(SIA_CACHE_DIR, metadata_path)
+    repo.index.add([metadata_abs_path] + paths)
     repo.index.commit('Initial revision')
 
+    # Set manifest
+    new_gist.skynet_manifest_url = Skynet.upload_file(metadata_abs_path, custom_filename=f'{gist_id}.json')
+    new_gist.sia_manifest_path = metadata_path
+    new_gist.save()
+
+    # Upload files
     for filepath in filepaths:
         filename = filepath.strip(f'/{gist_id}')
         print(f'======= {filepath}')
         file = File.objects.create(sia_path=filepath, skynet_url='', file_name=filename, gist=new_gist)
-        upload_file.delay(gist_id=new_gist.id, file_id=file.id, filename=filename)
+        upload_file(gist_id=new_gist.id, file_id=file.id, filename=filename)
 
     upload_zip.delay(gist_id=new_gist.id, filename=f'{gist_id}.zip')
 
     return Response({
         'id': gist_id,
-        'url': f'{HOST_URL}/gists/{gist_id}'
+        'url': f'{HOST_URL}/gists/{gist_id}',
+        'gist': new_gist.get_default_dict()
     })
 
 
@@ -106,36 +122,5 @@ def create_gist(request):
 @renderer_classes([JSONRenderer])
 def get_gist(request, gist_id):
     gist = Gist.objects.get(uuid=gist_id)
-    response = {
-        'id': gist_id,
-        'visibility': gist.visibility,
-        'skynet_url': gist.skynet_url,
-        'description': gist.description,
-        'expiration': gist.expiration,
-        'categories': gist.categories,
-        'user_address': gist.user_address,
-        'parent': gist.parent,
-        'package_path': gist.sia_path,
-        'active': gist.active,
-        'created': gist.created.isoformat(),
-        'updated_at': gist.updated_at.isoformat(),
-    }
 
-    files = []
-    ready = True
-    for file in gist.file_set.all():
-        files.append({
-            'sia_path': file.sia_path,
-            'skynet_url': file.skynet_url,
-            'file_name': file.file_name,
-            'created': file.created.isoformat(),
-            'updated_at': file.updated_at.isoformat(),
-        })
-
-        if not file.skynet_url:
-            ready = False
-
-    response['ready'] = ready
-    response['files'] = files
-
-    return Response(response)
+    return Response(gist.get_default_dict())
