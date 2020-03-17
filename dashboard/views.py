@@ -43,8 +43,12 @@ def new_gist(request):
 
 
 # Create your views here.
-def gist_details(request, gist):
-    return render(request, 'gist_details.html')
+def gist_details(request, gist_id):
+    gist = Gist.objects.get(uuid=gist_id)
+    context = {
+        'gist': gist
+    }
+    return render(request, 'gist_details.html', context=context)
 
 @csrf_exempt
 @api_view(['POST'])
@@ -94,5 +98,44 @@ def create_gist(request):
 
     return Response({
         'id': gist_id,
-        'url': f'{HOST_URL}/gist/{gist_id}'
+        'url': f'{HOST_URL}/gists/{gist_id}'
     })
+
+
+@api_view(['GET'])
+@renderer_classes([JSONRenderer])
+def get_gist(request, gist_id):
+    gist = Gist.objects.get(uuid=gist_id)
+    response = {
+        'id': gist_id,
+        'visibility': gist.visibility,
+        'skynet_url': gist.skynet_url,
+        'description': gist.description,
+        'expiration': gist.expiration,
+        'categories': gist.categories,
+        'user_address': gist.user_address,
+        'parent': gist.parent,
+        'package_path': gist.sia_path,
+        'active': gist.active,
+        'created': gist.created.isoformat(),
+        'updated_at': gist.updated_at.isoformat(),
+    }
+
+    files = []
+    ready = True
+    for file in gist.file_set.all():
+        files.append({
+            'sia_path': file.sia_path,
+            'skynet_url': file.skynet_url,
+            'file_name': file.file_name,
+            'created': file.created.isoformat(),
+            'updated_at': file.updated_at.isoformat(),
+        })
+
+        if not file.skynet_url:
+            ready = False
+
+    response['ready'] = ready
+    response['files'] = files
+
+    return Response(response)
