@@ -24,14 +24,17 @@
 
 	<ul class="navbar-nav ">
 	  <li class="nav-item">
-            <a class="nav-link" href="/gists">All gist</a>
+        <a class="nav-link" href="/gists">All gists</a>
+	  </li>
+        <li class="nav-item">
+        <a class="nav-link my-gists">My gists</a>
 	  </li>
 	</ul>
       </div>
       <div class="navbar-co">
 	<form class="form-inline">
-	  <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-	  <button class="btn btn-outline-success my-2 my-sm-0 hip-green" type="submit">Search</button>
+	  <input class="form-control mr-sm-2" id="searchbox" type="search" placeholder="Search" aria-label="Search">
+	  <button class="btn btn-outline-success my-2 my-sm-0 hip-green search-action">Search</button>
 	</form>
 
 	<a href="/" type="button" class="btn btn-link" aria-label="Left Align">
@@ -90,7 +93,24 @@
             console.log(error)
         }
 
+        $('.search-action').on('click', (e) => {
+          e.preventDefault();
+          const search = $('#searchbox').val()
+          if (search.length > 0) {
+            window.location = `/gists?q=${search}`
+          }
+        });
 
+        $('.my-gists').on('click', async (e) => {
+          e.preventDefault();
+          try {
+            const web3 = new Web3(Web3.givenProvider || "ws://localhost:8545");
+            const address = (await window.ethereum.enable())[0];
+            window.location = `/gists?profile=${address}`
+          } catch (e) {
+            alert('No address available')
+          }
+        });
       });
 
     </script>

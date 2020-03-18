@@ -98,7 +98,6 @@ img.rounded-circle {
 }
 
 h2{
-    padding: .375rem .75rem;
     font-size: 1rem;
     line-height: 1.5;
     color: #495057;
@@ -165,10 +164,11 @@ textarea#exampleFormControlTextarea1 {
     margin-right: 8px;
 }
 
-.username {
+.username, .humandate {
     color: #333 !important;
     margin-left: 8px;
 }
+
 .editor {
     border: 1px solid #ced4da;
 }

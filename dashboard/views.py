@@ -2,6 +2,7 @@ import json
 import uuid
 from os import path
 
+from django.db.models import Q
 from django.shortcuts import render
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
@@ -53,7 +54,20 @@ def gist_details(request, gist_id):
 
 
 def all_gists(request):
-    gists = Gist.objects.filter(active=True, visibility='public').exclude(skynet_manifest_url=None).order_by('-created')[:10]
+
+    gists = Gist.objects.filter(active=True, visibility='public')
+    try:
+        q = request.GET['profile']
+        gists = gists.filter(user_address=q)
+    except:
+        pass
+    try:
+        q = request.GET['q']
+        gists = gists.filter(Q(description__icontains=q) | Q(file__syntax__icontains=q) | Q(categories__icontains=q))
+    except:
+        pass
+    gists = gists.exclude(skynet_manifest_url=None).distinct().order_by('-created')[:10]
+
     context = {
         'gists': gists,
     }

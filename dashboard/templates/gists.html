@@ -19,10 +19,13 @@
           <div>
             <div id="login-status" class="d-flex align-items-center">
                 <div class="identicon"></div>
-                <p class="username">{{ gist.user_address }} <br><small>Created {{ gist.created|naturaltime }}</small></p>
+                <p><a href="/gists/?profile={{ gist.user_address }}"><span class="username">{{ gist.user_address }}</span></a> <br><small class="humandate">Created {{ gist.created|naturaltime }}</small></p>
             </div>
           </div>
-        <h2 class="description">{{ gist.description }}</h2>
+          <p class="description">{{ gist.description }}</p>
+          {% for category in gist.get_categories %}
+            <a href="/gists?q={{ category }}" class="badge badge-dark">{{ category }}</a>
+          {% endfor %}
       </div>
       {% with file=gist.preview_file %}
       <div class="form-group content-textarea">

@@ -74,6 +74,11 @@ class Gist(models.Model):
 
         return response
 
+    def get_categories(self):
+        file_categories = [file.syntax for file in self.file_set.all() if file.syntax]
+
+        return {*file_categories, *self.categories}
+
 
 class File(models.Model):
     sia_path = models.CharField(max_length=120, blank=True, default='')

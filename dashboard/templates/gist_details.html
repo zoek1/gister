@@ -34,6 +34,9 @@
       <div>
 	<div class="form-group">
 	  <h2>{{ gist.description }}</h2>
+      {% for category in gist.get_categories %}
+        <a href="/gists?q={{ category }}" class="badge badge-dark">{{ category }}</a>
+      {% endfor %}
 	</div>
      {% for file in files %}
      <div class="form-group content-textarea">
