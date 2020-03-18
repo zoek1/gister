@@ -25,7 +25,7 @@ const save_gists = async (visibility, description, expiration, categories, addre
 
 const on_submit = async (e) => {
   e.preventDefault();
-
+  $('#loading').modal('toggle')
   const description = $('#description').val();
   const visibility = $(e.target).data('visibility');
   const expiration = $('#expiration').val();
@@ -57,10 +57,11 @@ const on_submit = async (e) => {
 
   try {
     const resp = await save_gists(visibility, description, expiration, categories, address, files);
-
+    $('#loading').modal('toggle')
     window.location = resp.url
   } catch (e) {
     console.log(e)
+    $('#loading').modal('toggle')
     alert('Oh Gosh, something goes wrong! Contact to the dev team')
   }
 };

@@ -40,7 +40,9 @@ def write_files(directory, files, metadata):
 
 
 def new_gist(request):
-    return render(request, 'gist_new.html')
+    return render(request, 'gist_new.html', context={
+        'title': 'Create gist'
+    })
 
 
 def gist_details(request, gist_id):
@@ -49,6 +51,7 @@ def gist_details(request, gist_id):
     context = {
         'gist': gist,
         'files': files,
+        'title': gist.description or f'Sia gist {gist.uuid}'
     }
     return render(request, 'gist_details.html', context=context)
 
@@ -70,6 +73,7 @@ def all_gists(request):
 
     context = {
         'gists': gists,
+        'title': 'All gists'
     }
     return render(request, 'gists.html', context=context)
 
