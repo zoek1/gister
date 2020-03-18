@@ -27,13 +27,16 @@ class Gist(models.Model):
     description = models.CharField(max_length=220, null=True, blank=True)
     expiration = models.CharField(max_length=30, choices=EXPIRATION_OPTIONS)
     categories = ArrayField(models.CharField(max_length=40, blank=True), null=True, name='categories')
-    created = models.DateTimeField(auto_now=True)
-    updated_at = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     user_address = models.CharField(max_length=120, blank=True, default='')
     active = models.BooleanField(default=True)
     skynet_manifest_url = models.CharField(max_length=120, null=True, blank=True)
     sia_manifest_path = models.CharField(max_length=120, null=True, blank=True)
 
+    def preview_file(self):
+        file = self.file_set.first()
+        return file
 
     def get_default_dict(self):
         response = {
@@ -79,11 +82,15 @@ class File(models.Model):
     gist = models.ForeignKey(Gist, on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now_add=True)
+    syntax = models.CharField(max_length=40, null=True, blank=True)
 
     def get_skynet_url(self):
         return f'https://siasky.net/{self.skynet_url.lstrip("sia://")}'
 
     def get_lang(self):
+        if self.syntax:
+            return self.syntax
+
         if len(self.gist.categories) > 0:
             return self.gist.categories[0]
 

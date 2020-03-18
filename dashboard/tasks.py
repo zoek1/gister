@@ -14,7 +14,7 @@ def update_metadata(gist, filepath, field, value, type_field, push=False):
     with open(abs_path, 'r+') as f:
         metadata = json.loads(f.read())
         if type_field == 'files':
-            metadata['files'][field] = value
+            metadata['files'][field]['skynet_url'] = value
         f.seek(0)
         f.write(json.dumps(metadata))
         f.truncate()

@@ -6,7 +6,7 @@ const save_gists = async (visibility, description, expiration, categories, addre
       "description": description,
       "expiration": expiration,
       "categories": categories,
-      "user_address": address
+      "address": address
     },
     "files": files
   };
@@ -31,14 +31,27 @@ const on_submit = async (e) => {
   const expiration = $('#expiration').val();
   const categories = [$('#syntax').val()];
   console.log($(e.target))
-  if (document.contxt.codemirror.getValue().length === 0) {
-    alert('No content provided');
-    return;
-  }
 
-  const files = [
-    {name: 'basic.txt', content: document.contxt.codemirror.getValue() }
-  ];
+  const list_files = $(`.file`);
+  const files = [];
+
+  for(let i=0; i < list_files.length; i++) {
+    const filename = $(list_files[i]).find('#filename');
+    const code = $(list_files[i]).find('#editor');
+    const syntax = $(list_files[i]).find('#syntax').val()
+    if (filename.val().length === 0) {
+      filename.addClass('is-invalid')
+      alert(`Input field 'Filename' is required`);
+      return;
+    }
+
+    if (code.val().length === 0) {
+      alert(`No content provided in file  ${filename.val()}`);
+      return;
+    }
+
+    files.push({name: filename.val(), content: code.val(), syntax:  syntax})
+  }
 
   const address = document.contxt.address || '';
 
@@ -68,4 +81,12 @@ const get_gists = async (uuid) => {
   }))
 
   return populated;
+};
+
+const add_file = (e) => {
+  e.preventDefault();
+  const id =Math.round((new Date()).getTime() / 1000)
+  const template = new_template(id);
+  $('.files').append(template);
+  $(`#${id} .selectpicker`).selectpicker();
 };

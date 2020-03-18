@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block  head %}
+<script src="{% static "js/highlight.pack.js" %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlightjs-line-numbers.js@2.6.0/dist/highlightjs-line-numbers.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/10.0.0/markdown-it.min.js" integrity="sha256-YASERpEeN8gRNr/Fy4Km34WGFqIq1h6HkJMAQnVHlhk=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/blockies-identicon@0.1.0/blockies.min.js"></script>
+<script src="https://unpkg.com/3box/dist/3box.js"></script>
+
+{% endblock %}
+
+{% block content %}
+    <div class="container form">
+    {% for gist in gists %}
+      <div>
+      <div class="form-group">
+          <div>
+            <div id="login-status" class="d-flex align-items-center">
+                <div class="identicon"></div>
+                <p class="username">{{ gist.user_address }} <br><small>Created {{ gist.created|naturaltime }}</small></p>
+            </div>
+          </div>
+        <h2 class="description">{{ gist.description }}</h2>
+      </div>
+      {% with file=gist.preview_file %}
+      <div class="form-group content-textarea">
+          <div class="d-flex justify-content-center spinner">
+            <div class="spinner-grow text-info mt-5 mb-5" style="width: 3rem; height: 3rem;" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+          </div>
+          <a href="{% url 'gist-details' gist_id=gist.uuid %}">
+            <pre><code id="code-{{file.id}}" class="{{ file.get_lang }}"></code></pre>
+          </a>
+      </div>
+      {% endwith %}
+      <br>
+      </div>
+    {% endfor %}
+    </div>
+{% endblock %}
+
+{% block styles %}
+  <link rel="stylesheet" href="{% static "css/highlight/default.css" %}">
+  <link rel="stylesheet" href="{% static "css/highlight/github-gist.css" %}">
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/js/bootstrap-select.min.js"></script>
+<script src="{% static "js/download.js" %}"></script>
+<script src="{% static "js/gist.js" %}"></script>
+<script>
+
+(() => {
+{% for gist in gists %}
+  {% with file=gist.preview_file %}
+  fetch('{{ file.get_skynet_url }}')
+    .then((response) => response.text())
+    .then((full_content) => {
+      const element = document.getElementById('code-{{ file.id }}')
+
+      const content = full_content.split('\n').slice(0, 10).join('\n').slice(0, 800);
+
+      var icon = blockies.create({ // All options are optional
+        seed: "{{ gist.user_address }}", // seed used to generate icon data, default: random
+      });
+
+      {% if file.get_lang == 'Markdown' %}
+        const parent = element.parentElement
+        const md = window.markdownit();
+
+        parent.innerHTML = md.render(content);
+        parent.classList.add('markdown');
+
+        try {
+            identicon = parent.parentElement.parentElement.parentElement;
+            identicon.querySelector('.identicon').appendChild(icon)
+            identicon.querySelector('.spinner').remove()
+            if ("{{ gist.user_address }}" !== '') {
+              Box.getProfile("{{ gist.user_address }}").then((profile) => {
+                username = identicon.querySelector('.username')
+                username.innerText = profile.name || profile.handle || "{{ gist.user_address }}"
+              });
+            }
+          } catch (e) {
+            console.log(e)
+          }
+      {% else %}
+        element.textContent = content;
+        if (content.length > 0) {
+          hljs.highlightBlock(element);
+          hljs.lineNumbersBlock(element);
+          try {
+            identicon = element.parentElement.parentElement.parentElement.parentElement;
+            identicon.querySelector('.identicon').appendChild(icon)
+            identicon.querySelector('.spinner').remove()
+            if ("{{ gist.user_address }}" !== '') {
+              Box.getProfile("{{ gist.user_address }}").then((profile) => {
+                identicon.querySelector('.username').innerText = (profile.name || profile.handle || "{{ gist.user_address }}")
+              });
+            }
+          } catch (e) {
+            console.log(e)
+          }
+        }
+      {% endif %}
+
+
+
+    });
+  {% endwith %}
+{% endfor %}})();
+
+  $(document).ready(() => {
+    document.contxt = {}
+  });
+</script>
+{% endblock %}

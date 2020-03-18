@@ -16,7 +16,7 @@ ul.navbar-nav {
 }
 
 .navbar-dark .navbar-nav .nav-link{
-    color: #000;
+    color: #FAFAFA;
 }
 
 nav {
@@ -104,6 +104,9 @@ h2{
     color: #495057;
 }
 
+.add-file {
+    margin-left: 15px !important;
+}
 .b-ta {
     display: flex;
     justify-content: space-between;
@@ -141,7 +144,14 @@ textarea#exampleFormControlTextarea1 {
 .hip-black {
     background: linear-gradient(90deg, #333,  #111);
 }
+.hip-grey {
+    background-color: #62a08e;
+    color: white;
+}
 
+.hip-grey:hover {
+    background-color: #69aF8F;
+}
 
 .user-login {
     display: flex;
@@ -151,10 +161,14 @@ textarea#exampleFormControlTextarea1 {
 #login-status {
     margin-left: 8px;
 }
-#identicon {
+#identicon, .identicon {
     margin-right: 8px;
 }
 
+.username {
+    color: #333 !important;
+    margin-left: 8px;
+}
 .editor {
     border: 1px solid #ced4da;
 }
@@ -202,4 +216,24 @@ pre {
 
 .markdown {
     padding: 25px !important
+}
+
+.markdown * {
+    color: #333;
+}
+
+.description {
+    color: #aaa;
+}
+
+a:hover {
+    text-decoration: none;
+}
+a pre {
+    text-decoration: none;
+}
+
+a pre:hover {
+  box-shadow: -2px 0px 5px 0px #62a08e;
+    text-decoration: none;
 }

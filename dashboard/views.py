@@ -30,7 +30,7 @@ def write_files(directory, files, metadata):
         filepath = path.join(directory, file['name'])
         with open(path.join(SIA_CACHE_DIR, filepath), 'w') as file_manager:
             file_manager.write(file['content'])
-        filenames.append(filepath)
+        filenames.append({'path': filepath, 'syntax': file.get('syntax', 'plaintext')})
 
     with open(path.join(SIA_CACHE_DIR, filepath_metadata), 'w') as file_manager:
         file_manager.write(json.dumps(metadata))
@@ -38,12 +38,10 @@ def write_files(directory, files, metadata):
     return filenames, filepath_metadata
 
 
-# Create your views here.
 def new_gist(request):
     return render(request, 'gist_new.html')
 
 
-# Create your views here.
 def gist_details(request, gist_id):
     gist = Gist.objects.get(uuid=gist_id)
     files = gist.file_set.all()
@@ -52,6 +50,15 @@ def gist_details(request, gist_id):
         'files': files,
     }
     return render(request, 'gist_details.html', context=context)
+
+
+def all_gists(request):
+    gists = Gist.objects.filter(active=True, visibility='public').exclude(skynet_manifest_url=None).order_by('-created')[:10]
+    context = {
+        'gists': gists,
+    }
+    return render(request, 'gists.html', context=context)
+
 
 @csrf_exempt
 @api_view(['POST'])
@@ -90,11 +97,11 @@ def create_gist(request):
     metadata = base_metadata.copy()
     metadata['sia_package_path'] = f'{gist_id}.zip'
     metadata['skynet_package_url'] = ''
-    metadata['files'] = {file['name']: '' for file in files}
+    metadata['files'] = {file['name']: {'syntax': file['syntax'], 'skynet_url': ''} for file in files}
     metadata['created'] = timezone.now().isoformat()
     # Write and commit files
     [filepaths, metadata_path] = write_files(gist_id, files, metadata)
-    paths = [path.join(SIA_CACHE_DIR, filepath) for filepath in filepaths]
+    paths = [path.join(SIA_CACHE_DIR, filepath['path']) for filepath in filepaths]
     metadata_abs_path = path.join(SIA_CACHE_DIR, metadata_path)
     repo.index.add([metadata_abs_path] + paths)
     repo.index.commit('Initial revision')
@@ -106,9 +113,10 @@ def create_gist(request):
 
     # Upload files
     for filepath in filepaths:
-        filename = filepath.strip(f'/{gist_id}')
         print(f'======= {filepath}')
-        file = File.objects.create(sia_path=filepath, skynet_url='', file_name=filename, gist=new_gist)
+        filename = filepath['path'].split(f'{gist_id}/')[1]
+        print(f'======= {filename}')
+        file = File.objects.create(sia_path=filepath['path'], skynet_url='', file_name=filename, gist=new_gist, syntax=filepath['syntax'])
         upload_file(gist_id=new_gist.id, file_id=file.id, filename=filename)
 
     upload_zip.delay(gist_id=new_gist.id, filename=f'{gist_id}.zip')

@@ -13,18 +13,16 @@
     .then((content) => {
       const element = document.getElementById('code-{{ file.id }}')
 
-
-      {% if file.get_lang == 'Markdown' %}
+      {% if file.get_lang != 'Markdown' %}
+        element.textContent = content;
+        hljs.highlightBlock(element);
+        hljs.lineNumbersBlock(element);
+      {% else %}
         const parent = element.parentElement
         var md = window.markdownit();
         var result = md.render(content);
         parent.innerHTML = result;
         parent.classList.add('markdown');
-        console.log(parent)
-      {% else %}
-        element.textContent = content;
-        hljs.highlightBlock(element);
-        hljs.lineNumbersBlock(element);
       {% endif %}
     })
 {% endfor %}})();

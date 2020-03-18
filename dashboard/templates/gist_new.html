@@ -5,16 +5,163 @@
     <div class="container form">
       <form>
 	<div class="form-group">
-	  <input class="form-control"  id="description" type="text" placeholder="Gist description">
+	  <input class="form-control"  id="description" type="text" placeholder="Gist description - optional">
 	</div>
-	<div class="form-group editor">
-	  <textarea class="form-control" id="editor" rows="7"></textarea>
+	<div class="files">
+      <div class="form-group file">
+          <div class="b-ta">
+            <div>
+            <input class="form-control"  type="text" id="filename" placeholder="Filename">
+            <div class="invalid-feedback">
+                Filename required
+            </div>
+            </div>
+              <div>
+                <select class="selectpicker" id="syntax" data-live-search="true" >
+              <option value="Apache">Apache</option>
+              <option value="Bash">Bash</option>
+              <option value="C#">C#</option>
+              <option value="C++">C++</option>
+              <option value="CSS">CSS</option>
+              <option value="CoffeeScript">CoffeeScript</option>
+              <option value="Diff">Diff</option>
+              <option value="Go">Go</option>
+              <option value="HTML,">HTML,</option>
+              <option value="XML">XML</option>
+              <option value="HTTP">HTTP</option>
+              <option value="JSON / JSON with Comments">JSON / JSON with Comments</option>
+              <option value="Java">Java</option>
+              <option value="JavaScript">JavaScript</option>
+              <option value="Kotlin">Kotlin</option>
+              <option value="Less">Less</option>
+              <option value="Lua">Lua</option>
+              <option value="Makefile">Makefile</option>
+              <option value="Markdown">Markdown</option>
+              <option value="Nginx">Nginx</option>
+              <option value="Objective-C">Objective-C</option>
+              <option value="PHP">PHP</option>
+              <option value="Perl">Perl</option>
+              <option value="Properties">Properties</option>
+              <option value="Python">Python</option>
+              <option value="Ruby">Ruby</option>
+              <option value="Rust">Rust</option>
+              <option value="SCSS">SCSS</option>
+              <option value="SQL (Structured Query Language)">SQL (Structured Query Language)</option>
+              <option value="Shell">Shell</option>
+              <option value="Session">Session</option>
+              <option value="Swift">Swift</option>
+              <option value="TOML,">TOML,</option>
+              <option value="INI">INI</option>
+              <option value="TypeScript">TypeScript</option>
+              <option value="YAML">YAML</option>
+              <option value="plaintext" selected>plaintext</option>
+              <option value="Ada">Ada</option>
+              <option value="AsciiDoc">AsciiDoc</option>
+              <option value="Awk">Awk</option>
+              <option value="Clojure">Clojure</option>
+              <option value="Clojure REPL">Clojure REPL</option>
+              <option value="Coq">Coq</option>
+              <option value="Crystal">Crystal</option>
+              <option value="D">D</option>
+              <option value="Dart">Dart</option>
+              <option value="Django">Django</option>
+              <option value="Dockerfile">Dockerfile</option>
+              <option value="ERB (Embedded Ruby)">ERB (Embedded Ruby)</option>
+              <option value="Elixir">Elixir</option>
+              <option value="Elm">Elm</option>
+              <option value="Erlang">Erlang</option>
+              <option value="Fortran">Fortran</option>
+              <option value="Gradle">Gradle</option>
+              <option value="Gherkin">Gherkin</option>
+              <option value="Haml">Haml</option>
+              <option value="Hy">Hy</option>
+              <option value="Haskel">Haskel</option>
+              <option value="Julia">Julia</option>
+              <option value="Julia REPL">Julia REPL</option>
+              <option value="Lisp">Lisp</option>
+              <option value="LiveScript">LiveScript</option>
+              <option value="N1QL">N1QL</option>
+              <option value="Nix">Nix</option>
+              <option value="OCaml">OCaml</option>
+              <option value="Prolog">Prolog</option>
+              <option value="Protocol Buffers">Protocol Buffers</option>
+              <option value="Puppet">Puppet</option>
+              <option value="Python profile">Python profile</option>
+              <option value="QML">QML</option>
+              <option value="R">R</option>
+              <option value="ReasonML">ReasonML</option>
+              <option value="Scala">Scala</option>
+              <option value="SmallTalk">SmallTalk</option>
+              <option value="Stylus">Stylus</option>
+              <option value="TeX">TeX</option>
+              <option value="Twig">Twig</option>
+              <option value="VHDL">VHDL</option>
+              <option value="Vala">Vala</option>
+              <option value="Vim Script">Vim Script</option>
+          </select>
+              </div>
+          </div>
+        <textarea class="form-control" id="editor" rows="7"></textarea>
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <button class="btn btn-outline-success my-2 my-sm-0 hip-grey space-button add-file"><span class="fas fa-plus" aria-hidden="true"> Add new file</button>
+    </div>
+	<div class="form-group row">
+	  <label for="expiration" class="col-lg-2 col-sm-12 col-form-label">Paste Expiration</label>
+	  <div class="col-lg-3 col-sm-12">
+	    <select class="selectpicker" id="expiration" data-live-search="true" >
+	      <option value="NEVER" selected>Never</option>
+	      <option value="10_MINUTES">10 Minutes</option>
+	      <option value="1_HOUR">1 Hour</option>
+	      <option value="1_DAY">1 Day</option>
+	      <option value="1_WEEK">1 Week</option>
+	      <option value="2_WEEK">2 Weeks</option>
+	      <option value="1_MONTH">1 Month</option>
+	      <option value="6_MONTH">6 Months</option>
+	      <option value="1_YEAR">1 Year</option>
+	    </select>
+	  </div>
+	</div>
+	<div class="container-button">
+	  <button class="btn btn-outline-success my-2 my-sm-0 hip-black space-button create-gist" type="submit" data-visibility="private">Create secret gist</button>
+	  <button class="btn btn-outline-success my-2 my-sm-0 hip-green space-button create-gist" type="submit" data-visibility="public">Create public gist</button>
 	</div>
 
-	<div class="form-group row">
-	  <label for="syntax" class="col-lg-2 col-sm-12 col-form-label">Syntax Highlighting</label>
-	  <div class="col-lg-3 col-sm-12">
-	    <select class="selectpicker" id="syntax" data-live-search="true" >
+      </form>
+    </div>
+{% endblock %}
+
+
+
+{% block styles %}
+  <link rel="stylesheet" href="{% static "css/codemirror.css" %}">
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/js/bootstrap-select.min.js"></script>
+<script src="{% static "js/codemirror.js" %}"></script>
+<script src="{% static "js/gist.js" %}"></script>
+<script>
+  document.contxt = {};
+
+  $(document).ready(() => {
+    $('.selectpicker').selectpicker();
+    // document.contxt.codemirror =  new CodeMirror.fromTextArea(document.getElementById("editor"), {lineNumbers: true});
+
+    $('.create-gist').on('click', on_submit);
+    $('.add-file').on('click', add_file)
+  });
+
+  const new_template = (id) => `
+    <div id=${id} class="form-group file">
+      <div class="b-ta">
+        <div>
+          <input class="form-control"  type="text" id="filename" placeholder="Filename">
+        </div>
+        <div>
+          <select class="selectpicker" id="syntax" data-live-search="true" >
             <option value="Apache">Apache</option>
             <option value="Bash">Bash</option>
             <option value="C#">C#</option>
@@ -95,52 +242,10 @@
             <option value="VHDL">VHDL</option>
             <option value="Vala">Vala</option>
             <option value="Vim Script">Vim Script</option>
-	    </select>
-	  </div>
-	</div>
-	<div class="form-group row">
-	  <label for="expiration" class="col-lg-2 col-sm-12 col-form-label">Paste Expiration</label>
-	  <div class="col-lg-3 col-sm-12">
-	    <select class="selectpicker" id="expiration" data-live-search="true" >
-	      <option value="NEVER" selected>Never</option>
-	      <option value="10_MINUTES">10 Minutes</option>
-	      <option value="1_HOUR">1 Hour</option>
-	      <option value="1_DAY">1 Day</option>
-	      <option value="1_WEEK">1 Week</option>
-	      <option value="2_WEEK">2 Weeks</option>
-	      <option value="1_MONTH">1 Month</option>
-	      <option value="6_MONTH">6 Months</option>
-	      <option value="1_YEAR">1 Year</option>
-	    </select>
-	  </div>
-	</div>
-	<div class="container-button">
-	  <button class="btn btn-outline-success my-2 my-sm-0 hip-black space-button create-gist" type="submit" data-visibility="private">Create secret gist</button>
-	  <button class="btn btn-outline-success my-2 my-sm-0 hip-green space-button create-gist" type="submit" data-visibility="public">Create public gist</button>
-	</div>
-
-      </form>
-    </div>
-{% endblock %}
-
-
-
-{% block styles %}
-  <link rel="stylesheet" href="{% static "css/codemirror.css" %}">
-{% endblock %}
-
-{% block scripts %}
-<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.9/dist/js/bootstrap-select.min.js"></script>
-<script src="{% static "js/codemirror.js" %}"></script>
-<script src="{% static "js/gist.js" %}"></script>
-<script>
-  document.contxt = {};
-
-  $(document).ready(() => {
-    $('.selectpicker').selectpicker();
-    document.contxt.codemirror =  new CodeMirror.fromTextArea(document.getElementById("editor"), {lineNumbers: true});
-
-    $('.create-gist').on('click', on_submit);
-  });
+          </select>
+        </div>
+      </div>
+      <textarea class="form-control" id="editor" rows="7"></textarea>
+    </div>`;
 </script>
 {% endblock %}

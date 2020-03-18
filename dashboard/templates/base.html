@@ -73,18 +73,17 @@
 
           const address = (await window.ethereum.enable())[0];
           document.contxt.address = address;
-          const profile = await Box.getProfile(address);
-          const box = await Box.openBox(address, Web3.givenProvider);
-          await box.syncDone;
-          console.log('Ready 3box')
-
           var icon = blockies.create({ // All options are optional
             seed: address, // seed used to generate icon data, default: random
           });
-          $('#login-status').attr('style','display:none !important');
           $('#identicon').append(icon)
-          $('#username').text(profile.name || profile.handle || address)
           $('#login').attr('style','display:none !important');
+
+          const profile = await Box.getProfile(address);
+          // const box = await Box.openBox(address, Web3.givenProvider);
+          $('#login-status').attr('style','display:none !important');
+          $('#username').text(profile.name || profile.handle || address)
+
         } catch (error) {
           $('#login-status').attr('style','display:none !important');
             // User denied account access
