@@ -3,27 +3,34 @@ import os
 import shutil
 from os import path
 
+import requests
 from celery import shared_task
-from gister.settings import SIA_CACHE_DIR, SIA_REMOTE, SIA_API_BASEPATH
+from gister.settings import CACHE_DIR, WEB3_STORAGE_TOKEN, WEB3_STORAGE_URL
 from dashboard.models import Gist, File
-from dashboard.utils import SkynetClient as Skynet
 
 
 def update_metadata(gist, filepath, field, value, type_field, push=False):
-    abs_path = path.join(SIA_CACHE_DIR, filepath)
+    abs_path = path.join(CACHE_DIR, filepath)
     with open(abs_path, 'r+') as f:
         metadata = json.loads(f.read())
         if type_field == 'files':
-            metadata['files'][field]['skynet_url'] = value
+            metadata['files'][field]['cid'] = value
         f.seek(0)
         f.write(json.dumps(metadata))
         f.truncate()
 
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {WEB3_STORAGE_TOKEN}'
+    }
+
     if push:
-        skynet_url = Skynet.upload_file(abs_path, custom_filename=f'{gist.uuid}.json', force=True)
-        gist.skynet_manifest_url = skynet_url
-        gist.save()
-        return skynet_url
+        with open(abs_path, 'rb') as f:
+            response = requests.request("POST", f"{WEB3_STORAGE_URL}/upload", headers=headers, data=f)
+            gist.manifest_cid = response.json().get("cid")
+
+            gist.save()
+            return gist.manifest_cid
     return 'No update metadata'
 
 
@@ -34,18 +41,22 @@ def upload_file(*args, **kwargs):
     file_id = kwargs.get('file_id')
     filename = kwargs.get('filename')
 
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {WEB3_STORAGE_TOKEN}'
+    }
 
     file = File.objects.get(id=file_id, gist_id=gist_id)
-    skylink = Skynet.upload_file(path.join(SIA_CACHE_DIR, file.sia_path), custom_filename=filename)
+    with open(path.join(CACHE_DIR, file.path), 'rb') as f:
+        response = requests.request("POST", f"{WEB3_STORAGE_URL}/upload", headers=headers, data=f)
+        file.cid = response.json().get("cid")
+        file.save()
 
-    file.skynet_url = skylink
-    file.save()
+        push = File.objects.filter(id=file_id, cid='').count() == 0
+        metadata = update_metadata(gist, gist.manifest_path, file.file_name, file.cid, 'files', push=push)
 
-    push = File.objects.filter(id=file_id, skynet_url='').count() == 0
-    metadata = update_metadata(gist, gist.sia_manifest_path, file.file_name, skylink, 'files', push=push)
-
-    print(f'## DONE: {metadata}')
-    print(f'== DONE: {file.sia_path} - {skylink}')
+        print(f'## DONE: {metadata}')
+        print(f'== DONE: {file.path} - {file.cid}')
 
 
 @shared_task
@@ -53,14 +64,20 @@ def upload_zip(*args, **kwargs):
     gist_id = kwargs.get('gist_id')
     filename = kwargs.get('filename')
     gist = Gist.objects.get(id=gist_id)
-    repo_path = path.join(SIA_CACHE_DIR, gist.uuid)
+    repo_path = path.join(CACHE_DIR, gist.uuid)
 
     current_path = os.getcwd()
-    os.chdir(SIA_CACHE_DIR)
+    os.chdir(CACHE_DIR)
     shutil.make_archive(gist.uuid, 'zip', repo_path)
     os.chdir(current_path)
 
-    skylink = Skynet.upload_file(f'{repo_path}.zip', custom_filename=filename, portal=SIA_API_BASEPATH)
-    gist.skynet_url = skylink
-    gist.save()
-    print(f'== DONE: {gist.sia_path} - {skylink}')
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {WEB3_STORAGE_TOKEN}'
+    }
+
+    with open(f'{repo_path}.zip', 'rb') as f:
+        response = requests.request("POST", f"{WEB3_STORAGE_URL}/upload", headers=headers, data=f)
+        gist.cid = response.json().get("cid")
+        gist.save()
+        print(f'== DONE: {gist.sia_path} - {gist.cid}')

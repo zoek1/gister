@@ -59,7 +59,7 @@
 (() => {
 {% for gist in gists %}
   {% with file=gist.preview_file %}
-  fetch('{{ file.get_skynet_url }}')
+  fetch('{{ file.get_cid_url }}')
     .then((response) => response.text())
     .then((full_content) => {
       const element = document.getElementById('code-{{ file.id }}')

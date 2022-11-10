@@ -90,10 +90,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'password',
+        'USER': 'proof_server',
+        'PASSWORD': 'iehohp6iep5eez5fai3eechohdieQuee',
         'HOST': 'localhost',
-        'PORT': '',
+        'PORT': '5433',
     }
 }
 
@@ -138,7 +138,7 @@ STATIC_URL = '/static/'
 
 CELERY_BROKER_URL = 'redis://localhost'
 
-SIA_REMOTE = False
-SIA_API_BASEPATH = 'http://127.0.0.1:9980'
-SIA_CACHE_DIR = path.abspath('cache')
 HOST_URL = 'http://127.0.0.1:8000'
+CACHE_DIR = path.abspath('cache')
+WEB3_STORAGE_URL = "https://api.web3.storage"
+WEB3_STORAGE_TOKEN = ""

@@ -2,6 +2,7 @@ import json
 import uuid
 from os import path
 
+import requests
 from django.db.models import Q
 from django.shortcuts import render
 from django.utils import timezone
@@ -13,14 +14,8 @@ from git import Repo
 
 
 from dashboard.models import Gist, File
-from gister.settings import SIA_CACHE_DIR, SIA_REMOTE, HOST_URL, SIA_API_BASEPATH
+from gister.settings import CACHE_DIR, HOST_URL, WEB3_STORAGE_URL, WEB3_STORAGE_TOKEN
 from dashboard.tasks import upload_zip, upload_file
-from dashboard.utils import sia_upload_options
-
-if SIA_REMOTE:
-    from siaskynet import Skynet
-else:
-    from dashboard.utils import SkynetClient as Skynet
 
 
 def write_files(directory, files, metadata):
@@ -29,11 +24,11 @@ def write_files(directory, files, metadata):
 
     for file in files:
         filepath = path.join(directory, file['name'])
-        with open(path.join(SIA_CACHE_DIR, filepath), 'w') as file_manager:
+        with open(path.join(CACHE_DIR, filepath), 'w') as file_manager:
             file_manager.write(file['content'])
         filenames.append({'path': filepath, 'syntax': file.get('syntax', 'plaintext')})
 
-    with open(path.join(SIA_CACHE_DIR, filepath_metadata), 'w') as file_manager:
+    with open(path.join(CACHE_DIR, filepath_metadata), 'w') as file_manager:
         file_manager.write(json.dumps(metadata))
 
     return filenames, filepath_metadata
@@ -51,7 +46,7 @@ def gist_details(request, gist_id):
     context = {
         'gist': gist,
         'files': files,
-        'title': gist.description or f'Sia gist {gist.uuid}'
+        'title': gist.description or f'Gist {gist.uuid}'
     }
     return render(request, 'gist_details.html', context=context)
 
@@ -69,7 +64,7 @@ def all_gists(request):
         gists = gists.filter(Q(description__icontains=q) | Q(file__syntax__icontains=q) | Q(categories__icontains=q))
     except:
         pass
-    gists = gists.exclude(skynet_manifest_url=None).distinct().order_by('-created')[:10]
+    gists = gists.exclude(manifest_cid=None).distinct().order_by('-created')[:10]
 
     context = {
         'gists': gists,
@@ -87,13 +82,13 @@ def create_gist(request):
 
     files = request.data.get('files')
     raw_metadata = request.data.get('metadata')
-    repo_path = path.join(SIA_CACHE_DIR, gist_id)
+    repo_path = path.join(CACHE_DIR, gist_id)
     repo = Repo.init(repo_path)
 
     parent = raw_metadata.get('parent', None),
     parent_gist = None
     if parent:
-        gist = Gist.objects.filter(sia_path=parent)
+        gist = Gist.objects.filter(path=parent)
         if gist.exists():
             parent_gist = gist.first()
 
@@ -107,34 +102,40 @@ def create_gist(request):
         'uuid': gist_id
     }
     params = base_metadata.copy()
-    params['sia_path'] = f'{gist_id}.zip'
-    params['skynet_url'] = ''
+    params['path'] = f'{gist_id}.zip'
+    params['cid'] = ''
 
     new_gist = Gist.objects.create(**params)
 
     metadata = base_metadata.copy()
-    metadata['sia_package_path'] = f'{gist_id}.zip'
-    metadata['skynet_package_url'] = ''
-    metadata['files'] = {file['name']: {'syntax': file['syntax'], 'skynet_url': ''} for file in files}
+    metadata['package_path'] = f'{gist_id}.zip'
+    metadata['cid_package'] = ''
+    metadata['files'] = {file['name']: {'syntax': file['syntax'], 'cid': ''} for file in files}
     metadata['created'] = timezone.now().isoformat()
     # Write and commit files
     [filepaths, metadata_path] = write_files(gist_id, files, metadata)
-    paths = [path.join(SIA_CACHE_DIR, filepath['path']) for filepath in filepaths]
-    metadata_abs_path = path.join(SIA_CACHE_DIR, metadata_path)
+    paths = [path.join(CACHE_DIR, filepath['path']) for filepath in filepaths]
+    metadata_abs_path = path.join(CACHE_DIR, metadata_path)
     repo.index.add([metadata_abs_path] + paths)
     repo.index.commit('Initial revision')
 
     # Set manifest
-    new_gist.skynet_manifest_url = Skynet.upload_file(metadata_abs_path, custom_filename=f'{gist_id}.json')
-    new_gist.sia_manifest_path = metadata_path
-    new_gist.save()
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {WEB3_STORAGE_TOKEN}'
+    }
+    with open(metadata_abs_path, 'rb') as f:
+        response = requests.request("POST", f"{WEB3_STORAGE_URL}/upload", headers=headers, data=f)
+        new_gist.manifest_cid = response.json().get("cid")
+        new_gist.manifest_path = metadata_path
+        new_gist.save()
 
     # Upload files
     for filepath in filepaths:
         print(f'======= {filepath}')
         filename = filepath['path'].split(f'{gist_id}/')[1]
         print(f'======= {filename}')
-        file = File.objects.create(sia_path=filepath['path'], skynet_url='', file_name=filename, gist=new_gist, syntax=filepath['syntax'])
+        file = File.objects.create(path=filepath['path'], cid='', file_name=filename, gist=new_gist, syntax=filepath['syntax'])
         upload_file(gist_id=new_gist.id, file_id=file.id, filename=filename)
 
     upload_zip.delay(gist_id=new_gist.id, filename=f'{gist_id}.zip')

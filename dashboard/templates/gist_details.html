@@ -8,7 +8,7 @@
 <script>
 (() => {
 {% for file in files %}
-  fetch('{{ file.get_skynet_url }}')
+  fetch('{{ file.get_cid_url }}')
     .then((response) => response.text())
     .then((content) => {
       const element = document.getElementById('code-{{ file.id }}')
@@ -43,8 +43,8 @@
         <div class="b-ta">
             <p><i class="fas fa-code"></i> {{ file.file_name }}</p>
             <div>
-                <a  class="btn btn-textarea" href="{{ file.get_skynet_url }}">raw</a>
-                <a class="btn btn-textarea download" data-name="{{ file.file_name }}" href="{{ file.get_skynet_url }}" download>download</a>
+                <a  class="btn btn-textarea" href="{{ file.get_cid_url }}">raw</a>
+                <a class="btn btn-textarea download" data-name="{{ file.file_name }}" href="{{ file.get_cid_url }}" download>download</a>
             <!-- button class="btn btn-textarea " type="submit">report</button-->
             </div>
         </div>
