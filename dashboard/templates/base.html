@@ -117,13 +117,14 @@
           $('#identicon').append(icon)
           $('#login').attr('style','display:none !important');
 
-          const profile = await Box.getProfile(address);
+          //const profile = await Box.getProfile(address);
           // const box = await Box.openBox(address, Web3.givenProvider);
           $('#login-status').attr('style','display:none !important');
-          $('#username').text(profile.name || profile.handle || address)
+          $('#username').text(address.slice(0,8) + "..." + address.slice(34,42))
+
 
         } catch (error) {
-          $('#login-status').attr('style','display:none !important');
+            $('#login-status').attr('style','display:none !important');
             // User denied account access
             console.log(error)
         }
